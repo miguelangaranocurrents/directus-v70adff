@@ -25,7 +25,14 @@ const userStore = useUserStore();
 
 const repeaterValue = computed({
 	get() {
-		return props.value?.fields?.map((field: Field) => field.meta);
+		// `field`, `name` and `type` live on the field entry itself; `meta` may omit them (e.g. when the
+		// repeater was created through the API), so they are merged in to keep each row labelled.
+		return props.value?.fields?.map((field: Field) => ({
+			field: field.field,
+			name: field.name,
+			type: field.type,
+			...field.meta,
+		}));
 	},
 	set(newVal: FieldMeta[] | null) {
 		const fields = (newVal || []).map((meta: Record<string, any>) => ({

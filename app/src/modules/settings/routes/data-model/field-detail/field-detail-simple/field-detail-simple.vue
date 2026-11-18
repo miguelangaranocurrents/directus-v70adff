@@ -32,6 +32,8 @@ const { t } = useI18n();
 const fieldDetail = useFieldDetailStore();
 watch(collection, () => fieldDetail.update({ collection: collection.value.collection }), { immediate: true });
 
+const chosenInterface = syncFieldDetailStoreProperty('field.meta.interface');
+
 const { interfaces } = useExtensions();
 
 const interfacesSorted = computed(() => {
@@ -83,13 +85,16 @@ const groups = computed(() => {
 		const filteredInterfaces = interfacesSorted.value.filter((inter) => (inter.group ?? 'other') === group);
 		if (!search.value) return filteredInterfaces;
 		const searchValue = search.value!.toLowerCase();
+		// The chosen interface stays visible even when the search no longer matches it. Otherwise choosing a
+		// related collection can switch the interface (e.g. Many to Many -> Files) and hide its configuration.
 		return filteredInterfaces.filter(
-			(inter) => inter.id.toLowerCase().includes(searchValue) || inter.name.toLowerCase().includes(searchValue),
+			(inter) =>
+				inter.id === chosenInterface.value ||
+				inter.id.toLowerCase().includes(searchValue) ||
+				inter.name.toLowerCase().includes(searchValue),
 		);
 	}
 });
-
-const chosenInterface = syncFieldDetailStoreProperty('field.meta.interface');
 
 const configRow = computed(() => {
 	if (!chosenInterface.value) return null;
